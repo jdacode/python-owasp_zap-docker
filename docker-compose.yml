@@ -1,0 +1,28 @@
+version: "3"
+owasp:
+  container_name: python-owasp
+  build: .
+  command: python -u owasp.py
+  ports:
+    - "5000:5000"
+  volumes:
+    - .:/owasp
+  links:
+    - owasp_zap
+owasp_zap:
+  image: wasp/zap2docker-stable:latest
+  container_name: zap
+  ports:
+    - 8090:8090
+  user: zap
+  volumes:
+    - "${PWD}/zap_reports:/zap/reports:rw"
+  command: [
+    "zap.sh",
+    "-daemon",
+    "-host", "0.0.0.0",
+    "-port", "8090",
+    "-config", "api.addrs.addr.name=.*",
+    "-config", "api.addrs.addr.regex=true",
+    "-config", "api.disablekey=true"
+  ]
